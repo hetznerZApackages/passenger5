@@ -1,3 +1,9 @@
+passenger (1:5.3.7-1~stretch1+deb9hetz1~exp1) stretch-hetz-experimental; urgency=low
+
+  * Unifying HTTP and Server sockets to use UNIX sockets 
+
+ -- Danny Kopping <danny.kopping@xneelo.com>  Thu, 26 Mar 2020 15:36:55 +0200
+
 passenger (1:5.3.7-1~stretch1) stretch; urgency=low
 
   * Package built.
