@@ -1,0 +1,87 @@
+#!/usr/bin/make -f
+# export DH_VERBOSE=1
+
+NGINX_CONFIGURE_OPTIONS =
+
+# Speed up ccache (reduce I/O) by lightly compressing things.
+# Always set these variables because pbuilder uses ccache transparently.
+CCACHE_COMPRESS=1
+export CCACHE_COMPRESS
+CCACHE_COMPRESSLEVEL=3
+export CCACHE_COMPRESSLEVEL
+
+%:
+	dh $@
+
+override_dh_auto_configure:
+	# Do nothing
+
+override_dh_auto_build:
+	vendordir=`/usr/bin/ruby2.3 -rrbconfig -e 'puts RbConfig::CONFIG["vendordir"]'` && \
+		sed -i "s|@RUBYLIBDIR@|$$vendordir|g" \
+			debian/locations.ini \
+			debian/passenger.install \
+			debian/mod-http-passenger.conf \
+			debian/passenger.conf
+	vendordir=`/usr/bin/ruby2.3 -rrbconfig -e 'puts RbConfig::CONFIG["vendordir"]'` && \
+		archdir=`/usr/bin/ruby2.3 -rrbconfig -e 'puts RbConfig::CONFIG["archdir"]'` && \
+		/usr/bin/ruby2.3 /usr/bin/rake fakeroot \
+			RUBYLIBDIR="$$vendordir" \
+			RUBYARCHDIR="$$archdir" \
+			RUBY=/usr/bin/passenger_system_ruby \
+			FREE_RUBY=/usr/bin/passenger_free_ruby
+	mv pkg/fakeroot pkg/fakeroot2.3
+	/usr/bin/ruby2.3 -rrbconfig -e 'puts RbConfig::CONFIG["archdir"]' >> debian/passenger.install
+	cc -Wall -Os debian/passenger_free_ruby.c -o debian/passenger_free_ruby
+	cc -Wall -Os debian/passenger_system_ruby.c -o debian/passenger_system_ruby
+	cd nginx-1.14.0 && \
+		env $(NGINX_CONFIGURE_OPTIONS) ./configure --prefix=/tmp \
+		--with-cc-opt=-Wno-error --without-http_fastcgi_module --without-http_scgi_module --without-http_uwsgi_module --with-http_ssl_module --with-http_v2_module --with-http_realip_module --with-http_gzip_static_module --with-http_stub_status_module --with-http_addition_module \
+		--add-module=`pwd`/../src/nginx_module && \
+		make && \
+		mv objs/nginx objs/nginx-1.14.0
+	/usr/bin/rake nginx:as_dynamic_module && \
+		cd nginx-1.10.3 && \
+		./configure --with-pcre-jit --with-threads \
+		--with-ipv6 \
+		--with-http_gzip_static_module --with-http_gunzip_module \
+		--with-http_v2_module --with-http_dav_module \
+		--with-http_realip_module --with-http_geoip_module=dynamic \
+		--with-http_ssl_module --http-proxy-temp-path=/var/lib/nginx/proxy \
+		--add-dynamic-module=`pwd`/../src/nginx_module && \
+		echo '#define NGX_HTTP_HEADERS 1' >> objs/ngx_auto_config.h && \
+		make -f objs/Makefile modules && \
+		mv objs/ngx_http_passenger_module.so ../debian/ || \
+		mv modules/ngx_http_passenger_module.so ../debian/
+
+override_dh_auto_install:
+	mkdir debian/tmp/
+	# Merge the files for all Ruby versions into a single directory.
+	cp -a pkg/fakeroot2.3/* debian/tmp/
+	vendordir=`/usr/bin/ruby2.3 -rrbconfig -e 'puts RbConfig::CONFIG["vendordir"]'` && \
+		./dev/install_scripts_bootstrap_code.rb --ruby "$$vendordir" \
+		debian/tmp/usr/bin/* \
+		debian/tmp/usr/sbin/* \
+		`find debian/tmp/usr -name rack_handler.rb`
+	touch debian/tmp/usr/share/passenger/release.txt
+	cp debian/passenger_free_ruby debian/tmp/usr/bin/
+	cp debian/passenger_system_ruby debian/tmp/usr/bin/
+	mkdir -p debian/tmp/usr/lib/nginx/modules/ && cp debian/ngx_http_passenger_module.so debian/tmp/usr/lib/nginx/modules/
+
+override_dh_auto_clean:
+	/usr/bin/rake clean CLEAN_DOCS=false
+	rm -rf pkg/fakeroot2.3
+	cd nginx-1.14.0 && if test -f Makefile; then make clean; fi
+	# Hack to prevent HTML files from being renegerated
+	touch doc/*.html
+
+# Because we include Ruby extensions, the Debian package depends on libruby.
+# Since Phusion Passenger works fine without the Ruby extensions, we don't want
+# to depend on libruby.
+# https://github.com/phusion/passenger_apt_automation/issues/3
+override_dh_shlibdeps:
+	dh_shlibdeps
+	sed -i -E 's/libruby.*?, //g' debian/*.substvars
+
+override_dh_strip:
+	dh_strip --dbg-package=passenger-dbg

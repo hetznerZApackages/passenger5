@@ -1,0 +1,106 @@
+Source: passenger
+Section: ruby
+Priority: optional
+Maintainer: Phusion <info@phusion.nl>
+Uploaders: Phusion <info@phusion.nl>
+Build-Depends: debhelper (>= 7.0.50~), rake,
+ ruby2.3, ruby2.3-dev,
+ apache2 (>= 2.4), apache2-dev (>= 2.4),
+ libxslt-dev, libgd-dev, libgeoip-dev,
+ libapr1-dev, libcurl4-openssl-dev, zlib1g-dev, libpcre3-dev,
+ libssl1.0-dev
+Standards-Version: 3.9.3
+Homepage: https://www.phusionpassenger.com/
+Vcs-Git: git://github.com/phusion/passenger.git
+Vcs-Browser: https://github.com/phusion/passenger
+XS-Ruby-Versions: all
+
+Package: passenger
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends},
+ procps,
+ ruby2.5 | ruby2.4 | ruby2.3 | ruby2.2 | ruby2.1 | ruby2.0 | ruby1.9.1 | ruby1.8 | ruby-interpreter,
+ rubygems-integration (>= 1.8) | rubygems1.9.1 | rubygems1.9 | rubygems (>= 1.2),
+ ruby-rack
+Recommends: passenger-doc (= ${binary:Version}), passenger-dev (= ${binary:Version})
+Breaks: libapache2-mod-passenger (<< 1:5.3.7),
+ libnginx-mod-http-passenger (<< 1:5.3.7),
+ passenger-common, passenger-common1.8, passenger-common1.9.1, ruby-passenger
+Replaces: libapache2-mod-passenger (<< 1:5.3.7),
+ libnginx-mod-http-passenger (<< 1:5.3.7),
+ passenger-common, passenger-common1.8, passenger-common1.9.1, ruby-passenger
+Provides: ruby-passenger
+Description: Application server for Ruby, Node.js, Python, Meteor 
+ Passenger makes deployment of web apps very easy and robust. 
+ It can be used standalone or integrated with Nginx or Apache.
+ Passenger is a Phusion product.
+
+Package: passenger-dbg
+Architecture: any
+Section: debug
+Priority: extra
+Depends: passenger (= ${binary:Version}), ${misc:Depends},
+Description: Debugging symbols for Passenger application server 
+ Passenger makes deployment of web apps very easy and robust. 
+ It can be used standalone or integrated with Nginx or Apache.
+ Passenger is a Phusion product.
+ .
+ This package contains the debugging symbols for passenger.
+
+Package: passenger-dev
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends},
+ ruby2.5 | ruby2.4 | ruby2.3 | ruby2.2 | ruby2.1 | ruby2.0 | ruby1.9.1 | ruby1.8 | ruby-interpreter,
+ passenger (= ${binary:Version})
+Replaces: ruby-passenger-dev
+Conflicts: ruby-passenger-dev
+Provides: ruby-passenger-dev
+Description: Dependencies for compiling an Nginx module 
+ Convenience package that helps users to easily create 
+ a custom compilation of Nginx and the Passenger
+ application server. Passenger is a Phusion product that 
+ makes deployment of web apps very easy and robust.
+ .
+ This convenience package provides the development dependencies for compiling an Nginx module.
+
+Package: libapache2-mod-passenger
+Architecture: any
+Section: web
+Depends: ${shlibs:Depends}, ${misc:Depends},
+ apache2-api-20120211,
+ passenger (= ${binary:Version})
+Description: Apache integration for Passenger application server
+ Passenger is an application server for Ruby, Node.js, Python, Meteor. 
+ It makes deployment of web apps very easy and robust. Passenger is 
+ a Phusion product.
+ .
+ This package contains the Apache 2 module for integration with Passenger.
+
+Package: libnginx-mod-http-passenger
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends},
+ passenger (= ${binary:Version}),
+ nginx-common (>= 1.10.3-1+deb9u3),
+ nginx-common (<< 1.10.4)
+Description: Nginx integration for Passenger application server 
+ Passenger is an application server for Ruby, Node.js, Python, Meteor. 
+ It makes deployment of web apps very easy and robust. Passenger is a 
+ Phusion product.
+ .
+ This package contains the Nginx module for integration with Passenger.
+
+Package: passenger-doc
+Section: doc
+Architecture: all
+Depends: ${misc:Depends}
+Suggests: www-browser
+Provides: ruby-passenger-doc
+Conflicts: ruby-passenger-doc
+Replaces: ruby-passenger-doc
+Description: Documentation for Passenger application server 
+ Passenger makes deployment of web apps very easy and robust. 
+ It can be used standalone or integrated with Nginx or Apache.
+ Passenger is a Phusion product.
+ .
+ This package provides the documentation for Passenger.
+

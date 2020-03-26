@@ -1,0 +1,19 @@
+# The 'passenger' package also installs rubyarchdir. This is done by modifying
+# passenger.install in the `rules` files, target `override_dh_auto_build`.
+usr/lib/passenger/support-binaries/
+nginx-1.14.0/objs/nginx-1.14.0 usr/lib/passenger/support-binaries/
+usr/share/passenger/helper-scripts/
+usr/share/passenger/templates/
+usr/share/passenger/standalone_default_root/
+usr/share/passenger/ruby_extension_source/
+usr/share/passenger/node/
+usr/share/passenger/*.types
+usr/share/passenger/*.crt
+usr/share/passenger/*.txt
+# For update check:
+usr/share/passenger/*.pem
+usr/share/passenger/*.p12
+debian/locations.ini @RUBYLIBDIR@/phusion_passenger/
+@RUBYLIBDIR@/
+usr/sbin/
+usr/bin/
