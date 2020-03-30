@@ -1,3 +1,9 @@
+passenger (1:5.3.7-1~stretch1+deb9hetz1) stretch-hetz; urgency=low
+
+  * Released 1:5.3.7-1~stretch1+deb9hetz1~exp5 as 1:5.3.7-1~stretch1+deb9hetz1
+
+ -- Danny Kopping <danny.kopping@xneelo.com>  Mon, 30 Mar 2020 13:50:58 +0200
+
 passenger (1:5.3.7-1~stretch1+deb9hetz1~exp5) stretch-hetz-experimental; urgency=low
 
   * Unifying HTTP and Server sockets to use UNIX sockets 
